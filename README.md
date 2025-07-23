@@ -1,9 +1,7 @@
-# n8n-job-intership-apply-automation
-
 # 📌 Internship Auto-Application System (via Telegram + n8n)
 
 ## 🔍 Overview
-This n8n workflow automates the process of applying to internship/job opportunities by leveraging AI-powered text analysis and email generation. Triggered via Telegram, the workflow extracts insights from job descriptions, fetches the appropriate CV, crafts a professional email, and stores all the relevant information in a Google Sheet for tracking.
+This n8n workflow automates the process of applying to internship/job opportunities by leveraging AI-powered text analysis and email generation. Triggered via Telegram bot, the workflow extracts insights from job descriptions, fetches the appropriate CV, crafts a professional email, and stores all the relevant information in a Google Sheet for tracking.
 
 ## 🔁 Workflow Steps & Functional Breakdown
 
@@ -11,12 +9,12 @@ This n8n workflow automates the process of applying to internship/job opportunit
 - Triggered when a user sends a job or internship description via Telegram.
 - Captures the text message content and initiates the workflow.
 
-### 2. Preprocessing (Clean Text)
+### 2. Preprocessing 
 - Trims and sanitizes the raw Telegram message to isolate the job description.
 
 ### 3. AI Analysis of Job Description
 - Extracts:
-  - Job Category (Data Analyst, Data Science/AI, Computer Vision)
+  - Job Category (Data Analyst, Data Science, AI Engineer ,...)
   - Recruiter Email Address
   - LinkedIn Post Link (if present)
   - Language of the Job Description
@@ -59,7 +57,38 @@ This n8n workflow automates the process of applying to internship/job opportunit
 ## ✅ Use Case
 An intelligent assistant that automates and streamlines job/internship applications for data roles, saving time while ensuring quality and personalization.
 
-## 📈 Future Enhancements (Suggestions)
-- Add multi-CV template logic
-- Enable status update from email replies
-- Create dashboard to visualize application history and insights
+## Prerequisites
+- ### Required Credentials
+
+* **Telegram Bot API:** For receiving job descriptions
+* **OpenRouter API:** For GPT-4o Mini access
+* **Google Drive :** For CV storage and retrieval
+* **Gmail :** For sending applications
+* **Google Sheets :** For tracking submissions
+
+- ### Required Setup
+
+1. Google Drive Structure:
+
+-Folder containing CVs named by job category
+-PDF files: Data Analyst.pdf, Data science.pdf,...
+
+
+2. Google Sheets Structure:
+
+-Columns: Post, Email Recruiter, Status, Send Date, Offer Description, Language, Source
+
+
+3. Telegram Bot:
+
+-Configured webhook for message reception
+-Bot token properly configured
+
+4. Usage Instructions
+   
+For End Users
+
+- Send Job Description: Forward or type job description in Telegram chat
+- Automatic Processing: Workflow analyzes posting and generates application
+- Email Sent: Application email sent automatically with appropriate CV
+- Tracking Updated: Application logged in Google Sheets
