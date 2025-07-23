@@ -76,7 +76,7 @@
           },
           "folderId": {
             "__rl": true,
-            "value": "1ZyjRijZ9xxUiWuPEvMfTl4LOVbWXEB1j",
+            "value": "folder_id_of_your_cvs",
             "mode": "id"
           },
           "whatToSearch": "files"
@@ -101,7 +101,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an assistant that writes professional job application emails.\n\nGiven the following information:\n\nJob Description:\n{{ $('Clean text').item.json.job_description }}\nJob Category:\n{{ $('clean text').item.json.job_category }}\nRecruiter Email:\n{{ $('clean text').item.json.recruiter_email }}\nMy CV Content:\n{{ $json.text }}\nWrite an email applying for the position that fits the job category.\n\nRequirements:\n- Provide a concise and professional email subject line.\n- Write a polite and clear email body expressing interest, highlighting relevant skills and experiences from my CV, and asking for consideration.\n- Use a professional tone suitable for a job application.\n- If my name is required in the subject, add it. (My name: Hassan Fares)\n- Always start the email body with \"Hello/bonjour(depend on the langage)\" (no Dear/Sir/Madam...).\n- Just output the email subject and body text.\n-The Email should be write in {{ $('clean text').item.json.language }}\n-in the end of email add  these information : \n* Phone Number : +212609821684\n* Portfolio: https://www.datascienceportfol.io/Hassan\n* Linkdin : https://www.linkedin.com/in/hassan-fares-26544b2a4/ \n\nOutput the result in **JSON format exactly as follows**:\n{\n  \"subject\": \"<email subject here>\",\n  \"body\": \"<email body text here>\"\n}\n",
+        "text": "=You are an assistant that writes professional job application emails.\n\nGiven the following information:\n\nJob Description:\n{{ $('Clean text').item.json.job_description }}\nJob Category:\n{{ $('clean text').item.json.job_category }}\nRecruiter Email:\n{{ $('clean text').item.json.recruiter_email }}\nMy CV Content:\n{{ $json.text }}\nWrite an email applying for the position that fits the job category.\n\nRequirements:\n- Provide a concise and professional email subject line.\n- Write a polite and clear email body expressing interest, highlighting relevant skills and experiences from my CV, and asking for consideration.\n- Use a professional tone suitable for a job application.\n- If my name is required in the subject, add it. \n- Always start the email body with \"Hello/bonjour(depend on the langage)\" (no Dear/Sir/Madam...).\n- Just output the email subject and body text.\n-The Email should be write in {{ $('clean text').item.json.language }}\n-in the end of email add  these information : Your_personnel informations \n\nOutput the result in **JSON format exactly as follows**:\n{\n  \"subject\": \"<email subject here>\",\n  \"body\": \"<email body text here>\"\n}\n",
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
@@ -155,7 +155,7 @@
     },
     {
       "parameters": {
-        "sendTo": "hassanfares7040@gmail.com",
+        "sendTo": "exemple@gmail.com",
         "subject": "={{ $json.subject }}",
         "emailType": "text",
         "message": "={{ $json.body }}",
@@ -348,7 +348,7 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1AjoB4Dd_8ONKNJ7d1T_fUJz39mMvkYLCNbEHZYjLEtM",
+          "value": "your_google_sheet_id",
           "mode": "id"
         },
         "sheetName": {
@@ -356,7 +356,7 @@
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Feuille 1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AjoB4Dd_8ONKNJ7d1T_fUJz39mMvkYLCNbEHZYjLEtM/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your_google_sheet_id/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
