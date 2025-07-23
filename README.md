@@ -1,6 +1,6 @@
-# 📌 Internship Auto-Application System (via Telegram + n8n)
+# 📌 Internship Auto-Application System 
 
-<img width="1249" height="305" alt="Capture d'écran 2025-07-23 161849" src="https://github.com/user-attachments/assets/9c8b4720-ca55-437e-8bc8-1f886f17d3c0" />
+<img width="1219" height="290" alt="Capture d'écran 2025-07-23 161849" src="https://github.com/user-attachments/assets/091b2a05-9779-45b7-90d5-3153c6590f75" />
 
 ## 🔍 Overview
 This n8n workflow automates the process of applying to internship/job opportunities by leveraging AI-powered text analysis and email generation. Triggered via Telegram bot, the workflow extracts insights from job descriptions, fetches the appropriate CV, crafts a professional email, and stores all the relevant information in a Google Sheet for tracking.
