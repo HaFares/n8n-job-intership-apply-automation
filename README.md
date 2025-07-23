@@ -58,37 +58,37 @@ This n8n workflow automates the process of applying to internship/job opportunit
 An intelligent assistant that automates and streamlines job/internship applications for data roles, saving time while ensuring quality and personalization.
 
 ## Prerequisites
-- ### Required Credentials
+### Required Credentials
 
-* **Telegram Bot API:** For receiving job descriptions
-* **OpenRouter API:** For GPT-4o Mini access
-* **Google Drive :** For CV storage and retrieval
-* **Gmail :** For sending applications
-* **Google Sheets :** For tracking submissions
+  * **Telegram Bot API:** For receiving job descriptions
+  * **OpenRouter API:** For GPT-4o Mini access
+  * **Google Drive :** For CV storage and retrieval
+  * **Gmail :** For sending applications
+  * **Google Sheets :** For tracking submissions
 
-- ### Required Setup
+### Required Setup
 
 1. Google Drive Structure:
 
-- Folder containing CVs named by job category
-- PDF files: Data Analyst.pdf, Data science.pdf,...
+  - Folder containing CVs named by job category
+  - PDF files: Data Analyst.pdf, Data science.pdf,...
 
 
 2. Google Sheets Structure:
 
-- Columns: Post, Email Recruiter, Status, Send Date, Offer Description, Language, Source
+  - Columns: Post, Email Recruiter, Status, Send Date, Offer Description, Language, Source
 
 
 3. Telegram Bot:
 
-- Configured webhook for message reception
-- Bot token properly configured
+  - Configured webhook for message reception
+  - Bot token properly configured
 
 4. Usage Instructions
    
-For End Users
-
-- Send Job Description: Forward or type job description in Telegram chat
-- Automatic Processing: Workflow analyzes posting and generates application
-- Email Sent: Application email sent automatically with appropriate CV
-- Tracking Updated: Application logged in Google Sheets
+  For End Users
+  
+  - Send Job Description: Forward or type job description in Telegram chat
+  - Automatic Processing: Workflow analyzes posting and generates application
+  - Email Sent: Application email sent automatically with appropriate CV
+  - Tracking Updated: Application logged in Google Sheets
