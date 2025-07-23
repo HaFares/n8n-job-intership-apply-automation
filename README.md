@@ -70,19 +70,19 @@ An intelligent assistant that automates and streamlines job/internship applicati
 
 1. Google Drive Structure:
 
--Folder containing CVs named by job category
--PDF files: Data Analyst.pdf, Data science.pdf,...
+- Folder containing CVs named by job category
+- PDF files: Data Analyst.pdf, Data science.pdf,...
 
 
 2. Google Sheets Structure:
 
--Columns: Post, Email Recruiter, Status, Send Date, Offer Description, Language, Source
+- Columns: Post, Email Recruiter, Status, Send Date, Offer Description, Language, Source
 
 
 3. Telegram Bot:
 
--Configured webhook for message reception
--Bot token properly configured
+- Configured webhook for message reception
+- Bot token properly configured
 
 4. Usage Instructions
    
