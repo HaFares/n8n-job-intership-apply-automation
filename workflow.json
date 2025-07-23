@@ -1,0 +1,630 @@
+{
+  "name": "interships",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -820,
+        -200
+      ],
+      "id": "161905f8-f7cb-4aa0-8e3e-6c8641349896",
+      "name": "Send intership description",
+      "webhookId": "d5372b75-e960-47fd-9d9c-b3bd6721713f",
+      "credentials": {
+        "telegramApi": {
+          "id": "leDLovhookg55JWh",
+          "name": "intership_apply"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  job_description: $input.first().json.message.text.trim()\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -600,
+        -200
+      ],
+      "id": "fa5e939c-0f58-4c6e-9b5c-01e5e10b4853",
+      "name": "Clean text"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an assistant that analyzes job descriptions.\n\nYour tasks are:\n1️⃣ Classify the type of job based on the description provided.\n2️⃣ Extract the recruiter’s email address if it appears in the description.\n3️⃣ Detect the language used in the job description (for example: English, French, Spanish…).\n4️⃣ Extract the LinkedIn post link if it appears in the description.\n\nJob Description:\n{{ $json.job_description }}\n\nJob Categories (select only one):\n\nData Analyst\n\nData science_Ai\n\nComputer Vision\n\nRespond in JSON format exactly as follows:\n{\n  \"job_category\": \"<selected category>\",\n  \"recruiter_email\": \"<extracted email or 'Not Found'>\",\n  \"language\": \"<detected language>\",\n  \"linkedin_link\": \"<extracted LinkedIn URL or 'Not Found'>\"\n}\nDo not explain anything else.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -380,
+        -200
+      ],
+      "id": "823de73f-67a1-4071-abb4-c9764c50a3ca",
+      "name": "Get intership_type & Email recruiter"
+    },
+    {
+      "parameters": {
+        "jsCode": "// The raw response text from the LLM (with markdown formatting)\nconst rawResponse = $input.first().json.text || '';\n\n// Clean the response by removing markdown code fences, line breaks, and spaces\nconst cleaned = rawResponse\n  .replace(/```json/gi, '')   // Remove ```json (case-insensitive)\n  .replace(/```/g, '')        // Remove ```\n  .replace(/\\n/g, '')         // Remove newlines\n  .trim();                    // Remove leading/trailing spaces\n\nlet parsed = {};\ntry {\n  if (cleaned) {\n    parsed = JSON.parse(cleaned);\n  }\n} catch (error) {\n  console.log('JSON Parse Error:', error.message);\n}\n\n// Extract values with fallback\nconst jobCategory = parsed.job_category?.toString().trim() || parsed.job_type?.toString().trim() || 'Not Classified';\nconst recruiterEmail = parsed.recruiter_email?.toString().trim() || 'Not Found';\nconst language = parsed.language?.toString().trim() || 'Unknown';\nconst LinkdinLink = parsed.Linkdin_Link?.toString().trim() || 'Not Found';\n\n\n// Return formatted output\nreturn [{\n  json: {\n    job_category: jobCategory,\n    recruiter_email: recruiterEmail,\n    language: language,\n    Linkdin_Link:LinkdinLink\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        -200
+      ],
+      "id": "3836b6ae-4e2a-4ea1-90c6-86bdeffb1883",
+      "name": "clean text"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.job_category }}.pdf",
+        "filter": {
+          "driveId": {
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "value": "1ZyjRijZ9xxUiWuPEvMfTl4LOVbWXEB1j",
+            "mode": "id"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        200,
+        -200
+      ],
+      "id": "29955eea-eb63-43b9-9d56-6c91e345613e",
+      "name": "Search Cv for this offer",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "7wHi69UA0jTDqYaU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an assistant that writes professional job application emails.\n\nGiven the following information:\n\nJob Description:\n{{ $('Clean text').item.json.job_description }}\nJob Category:\n{{ $('clean text').item.json.job_category }}\nRecruiter Email:\n{{ $('clean text').item.json.recruiter_email }}\nMy CV Content:\n{{ $json.text }}\nWrite an email applying for the position that fits the job category.\n\nRequirements:\n- Provide a concise and professional email subject line.\n- Write a polite and clear email body expressing interest, highlighting relevant skills and experiences from my CV, and asking for consideration.\n- Use a professional tone suitable for a job application.\n- If my name is required in the subject, add it. (My name: Hassan Fares)\n- Always start the email body with \"Hello/bonjour(depend on the langage)\" (no Dear/Sir/Madam...).\n- Just output the email subject and body text.\n-The Email should be write in {{ $('clean text').item.json.language }}\n-in the end of email add  these information : \n* Phone Number : +212609821684\n* Portfolio: https://www.datascienceportfol.io/Hassan\n* Linkdin : https://www.linkedin.com/in/hassan-fares-26544b2a4/ \n\nOutput the result in **JSON format exactly as follows**:\n{\n  \"subject\": \"<email subject here>\",\n  \"body\": \"<email body text here>\"\n}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        860,
+        -200
+      ],
+      "id": "f3878af1-f4da-455e-aa1b-1124104e9eec",
+      "name": "Génerate email"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.text || '';\n\n// Clean the response by removing markdown code fences and trimming\nconst cleanedText = text\n  .replace(/```json/gi, '')   // Remove ```json (case-insensitive)\n  .replace(/```/g, '')        // Remove ```\n  .trim();\n\nlet parsed = {};\ntry {\n  parsed = JSON.parse(cleanedText);\n} catch (error) {\n  console.log('JSON Parse Error:', error.message);\n  parsed = {};\n}\n\nreturn [\n  {\n    json: {\n      subject: parsed.subject || 'No Subject Found',\n      body: parsed.body || 'No Body Found'\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        -200
+      ],
+      "id": "4fdcb53d-b74f-4dd4-9f13-50c8ff3aa67b",
+      "name": "Clean Text"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Search Cv for this offer').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1440,
+        -200
+      ],
+      "id": "19a1f6f9-07fa-4759-831d-d74ed0d89c4e",
+      "name": "Download CV",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "7wHi69UA0jTDqYaU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "hassanfares7040@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "=data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1660,
+        -200
+      ],
+      "id": "1e4a1197-7fa1-45a4-b66f-525ca6c9148f",
+      "name": "Send Email",
+      "webhookId": "668ce2cf-d984-4532-92a3-31f877b3ca69",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1cq9u7QgQAI7xxfC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        20
+      ],
+      "id": "633bf3d3-a0c4-496b-bbb1-99174288ed53",
+      "name": "GPT 4o Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Vg7FXN9MOCENwKfU",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Search Cv for this offer').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        420,
+        -200
+      ],
+      "id": "a34c0d88-319d-430e-93fd-ee21156524d3",
+      "name": "Download CV1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "7wHi69UA0jTDqYaU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -200
+      ],
+      "id": "acbcc234-0a1f-46d3-9ed9-501da4b1b14d",
+      "name": "Extract Text from CV"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        940,
+        20
+      ],
+      "id": "4b76ca38-5864-48bc-8372-e8ba0c76205c",
+      "name": "GPT 4o Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Vg7FXN9MOCENwKfU",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🚀 Trigger & Input\n\n1. User sends job/internship description via Telegram.\n2. Workflow is triggered by Telegram message.\n3. The description text is trimmed and passed to AI for analysis.\n\n## 🧠 AI Analysis\n\nGPT-4o Mini analyzes the job description to:\n- Classify the role into: Data Analyst, Data Science/AI, Computer Vision\n- Extract recruiter email\n- Identify the language\n- Detect LinkedIn post (if any)\n\n",
+        "height": 760,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -880,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "019a2d6f-0665-4a61-8676-f7f040646e8a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 📂 CV Retrieval & Processing\n\n1. Search Google Drive folder using the job category.\n2. Download the matching CV PDF.\n3. Extract raw text from CV for use in email generation.\n\n\n",
+        "height": 760,
+        "width": 700,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        100,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "ce8e8537-f357-444f-aaa0-c9191dbc284a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 📧 Email Generation & Sending\n\n1. GPT-4o Mini writes a professional email using:\n   * Job description\n   *  Extracted CV text\n   *  Language of the post\n\n2. Final email is cleaned and sent via Gmail.\n3. The CV is attached.\n",
+        "height": 760,
+        "width": 780,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        820,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "e222eb57-189a-4cee-b6e2-558a4c681d7a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date();\n\nconst year = today.getFullYear();\nconst month = String(today.getMonth() + 1).padStart(2, '0');  // Add leading zero\nconst day = String(today.getDate()).padStart(2, '0');\nconst hours = String(today.getHours()).padStart(2, '0');\nconst minutes = String(today.getMinutes()).padStart(2, '0');\n\nconst formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;\nreturn [\n  {\n    json: {\n      execution_date: formattedDate\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1880,
+        -200
+      ],
+      "id": "04eabc60-3498-43fc-85a6-be9b6211fadd",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "## 📊 Save informations to Google Sheet\n\nRecords all application details in a Google Sheet for comprehensive tracking and analytics:\n- Job Category\n- Recruiter Email\n- LinkedIn Source\n- Language\n- Offer Description\n- Application Status\n- Send Date\n",
+        "height": 760,
+        "width": 780,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1620,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "a08391b3-4ba7-49ab-b24f-0fbb93a6c058",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1AjoB4Dd_8ONKNJ7d1T_fUJz39mMvkYLCNbEHZYjLEtM",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AjoB4Dd_8ONKNJ7d1T_fUJz39mMvkYLCNbEHZYjLEtM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Post": "={{ $('clean text').item.json.job_category }}",
+            "Email Recuiter": "={{ $('clean text').item.json.recruiter_email }}",
+            "Statut": "Send",
+            "Send Date": "={{ $json.execution_date }}",
+            "Offer Descreption": "={{ $('Send intership description').item.json.message.text }}",
+            "Langue": "={{ $('clean text').item.json.language }}",
+            "Source": "={{ $('clean text').item.json.Linkdin_Link }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Post",
+              "displayName": "Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Recuiter",
+              "displayName": "Email Recuiter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Statut",
+              "displayName": "Statut",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Send Date",
+              "displayName": "Send Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Offer Descreption",
+              "displayName": "Offer Descreption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Langue",
+              "displayName": "Langue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2180,
+        -200
+      ],
+      "id": "c638aae8-9be1-4fd6-9338-09288b8f7c09",
+      "name": "Save infos about offer",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TKSxo4XZAdheMkxQ",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send intership description": {
+      "main": [
+        [
+          {
+            "node": "Clean text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean text": {
+      "main": [
+        [
+          {
+            "node": "Get intership_type & Email recruiter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get intership_type & Email recruiter": {
+      "main": [
+        [
+          {
+            "node": "clean text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clean text": {
+      "main": [
+        [
+          {
+            "node": "Search Cv for this offer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Cv for this offer": {
+      "main": [
+        [
+          {
+            "node": "Download CV1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Génerate email": {
+      "main": [
+        [
+          {
+            "node": "Clean Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Text": {
+      "main": [
+        [
+          {
+            "node": "Download CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download CV": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT 4o Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Get intership_type & Email recruiter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download CV1": {
+      "main": [
+        [
+          {
+            "node": "Extract Text from CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text from CV": {
+      "main": [
+        [
+          {
+            "node": "Génerate email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT 4o Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Génerate email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Save infos about offer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2491efa6-4e3c-4f57-b67e-5d9f87164008",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "50f5bf0a548bc6db4e9ca248dd72b3e5734bce9fba0048982eff7d54fb9e7d41"
+  },
+  "id": "clVq5mVkpkNh7vlA",
+  "tags": []
+}
